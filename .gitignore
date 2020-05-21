@@ -1,0 +1,13 @@
+# folders
+sat_dat/
+
+**/test/**
+
+# extensions
+*.log
+*.pkl
+*.docx
+*.zip
+*.pdf
+*.gs
+*.pptx
