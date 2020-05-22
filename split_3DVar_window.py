@@ -6,7 +6,7 @@
 @Author: Hejun Xie
 @Date: 2020-05-21 22:50:57
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-05-22 13:10:34
+@LastEditTime: 2020-05-22 15:33:22
 '''
 
 # global import
@@ -18,24 +18,17 @@ import datetime as dt
 
 
 # local import
-from utils import config_list, makenewdir
+from utils import makenewdir
 from window import WindowAssemble, Window
-
-
-CONFIGPATH = './config/' # default config path
-cong = config_list(CONFIGPATH, ['config.yml'])
-
-# config script
-for key, value in cong.items():
-    globals()[key] = value
 
 class SatWorkStation(object):
     def __init__(self, sat_name, old_dir, new_dir, \
-                 old_window, new_window, \
+                 old_window, new_window, old_start_dt, \
                  start_dt, end_dt, nchannels):
         self.sat_name = sat_name
         self.old_dir = old_dir
         self.new_dir = new_dir
+        self.old_start_dt = old_start_dt
         self.start_dt = start_dt
         self.end_dt = end_dt
         self.nchannels = nchannels
@@ -86,7 +79,7 @@ class SatWorkStation(object):
             raise ValueError('Unknown sattelite name {}'.format(self.sat_name))
 
     def split_data(self):
-        cursor_olddt = self.start_dt
+        cursor_olddt = self.old_start_dt
         cursor_newdt = self.start_dt
         
         # Iterate over newdts
@@ -151,8 +144,37 @@ class SatWorkStation(object):
 
 if __name__ == "__main__":
 
-    start_dt    = dt.datetime.strptime(start_str, "%Y%m%d%H%M")
-    end_dt      = dt.datetime.strptime(end_str, "%Y%m%d%H%M")
+    # configuration
+    oldwindow_dir = sys.argv[1]
+    newwindow_dir = sys.argv[2]
+    start_str = sys.argv[3]
+
+    # date
+    end_str     =  start_str
+    
+    # channels
+    nchannels = {
+    "metop1": 20,
+    "metop2": 20,
+    "noaa15": 20,
+    "noaa18": 20,
+    "noaa19": 20,
+    "npp": 22
+    }
+
+    # window length [hours]
+    oldwindow_len = 6 
+    newwindow_len = 3
+
+    # new dt
+    start_dt        = dt.datetime.strptime(start_str, "%Y%m%d%H")
+    end_dt          = dt.datetime.strptime(end_str, "%Y%m%d%H")
+    
+    # old dt
+    if start_dt.hour % oldwindow_len == 0:
+        old_start_dt = start_dt
+    else:
+        old_start_dt = start_dt - dt.timedelta(hours=start_dt.hour%oldwindow_len)
 
     makenewdir(newwindow_dir)
 
@@ -161,7 +183,7 @@ if __name__ == "__main__":
     for satellite in satellites:
         print(satellite)
         sws = SatWorkStation(satellite, oldwindow_dir, newwindow_dir, \
-                             oldwindow_len, newwindow_len, \
+                             oldwindow_len, newwindow_len, old_start_dt, \
                              start_dt, end_dt, nchannels[satellite])
         
         sws.split_data()

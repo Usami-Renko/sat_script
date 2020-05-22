@@ -3,7 +3,7 @@
 @Author: Hejun Xie
 @Date: 2020-05-22 12:54:35
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-05-22 12:57:17
+@LastEditTime: 2020-05-22 15:41:26
 '''
 import os
 import sys
@@ -11,6 +11,11 @@ import struct
 import numpy as np
 import datetime as dt
 
+# valid region
+slat=10
+elat=60
+slon=70
+elon=145
 
 class WindowAssemble(object):
     def __init__(self):
@@ -120,6 +125,9 @@ class Window(object):
                 if not Data:
                     break
                 FData = struct.unpack(self.fmt, Data)
+                lat, lon = FData[9], FData[10]
+                if not ((slat <= lat <= elat) and (slon <= lon <= elon)):
+                    continue
                 year, month, day, hour, minute, second = FData[1], FData[2], FData[3], FData[4], FData[5], FData[6]
                 Time = dt.datetime(year, month, day, hour, minute, second)
                 self.recordData.append(Data)
@@ -127,6 +135,10 @@ class Window(object):
 
             
     def write_data(self):
+        # print(len(self.recordData))
+        if len(self.recordData) == 0:
+            print("No valid data for this window")
+            return
         with open(self.filename,'wb') as fhandle:
             for Data in self.recordData:
                 fhandle.write(Data)
