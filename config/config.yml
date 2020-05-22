@@ -1,0 +1,21 @@
+# channels
+nchannels:
+  metop1: 20
+  metop2: 20
+  noaa15: 20
+  noaa18: 20
+  noaa19: 20
+  npp: 22
+
+# date
+start_str: "2020050100"
+end_str: "2020050200"
+
+# path
+oldwindow_dir: "./sat_dat"
+newwindow_dir: "./new_sat_dat"
+
+# window length [hours]
+oldwindow_len: 6 
+newwindow_len: 3
+
