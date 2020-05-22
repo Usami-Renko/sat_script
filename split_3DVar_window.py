@@ -6,7 +6,7 @@
 @Author: Hejun Xie
 @Date: 2020-05-21 22:50:57
 @LastEditors: Hejun Xie
-@LastEditTime: 2020-05-22 12:56:43
+@LastEditTime: 2020-05-22 13:10:34
 '''
 
 # global import
@@ -98,6 +98,15 @@ class SatWorkStation(object):
             cursor_newfile = self._generate_file_dt(cursor_newdt, self.new_dir)
             cursor_newwindow = Window(cursor_newdt, self.new_window, cursor_newfile, self.recordLen, self.fmt)
             
+            # check if the new window can be generated
+            if cursor_newwindow.start_dt <= self.start_dt - dt.timedelta(hours=self.old_window)/2.:
+                cursor_newdt += dt.timedelta(hours=self.new_window)
+                continue
+            
+            if cursor_newwindow.end_dt >= self.end_dt + dt.timedelta(hours=self.old_window)/2.:
+                break
+            
+            # Copnfirmed: can be generated
             print('New Sat File: {}'.format(cursor_newfile))
 
             # Iterate over old window list and dequeue the old window that do not intersect with new window 
